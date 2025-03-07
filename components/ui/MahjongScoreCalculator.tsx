@@ -145,27 +145,32 @@ const MahjongScoreCalculator = () => {
     }
 
     let ronPoints, tsumoPointsDealer, tsumoPointsChild;
-    
-    if (han >= 13) {
+
+    if(han >= 26) {
+        ronPoints = { dealer: 96000, child: 64000 };
+        tsumoPointsDealer = "32000オール";
+        tsumoPointsChild = "16000/32000";
+      }
+    else if (han >= 13) {
       ronPoints = { dealer: 48000, child: 32000 };
       tsumoPointsDealer = "16000オール";
-      tsumoPointsChild = "16000/32000";
+      tsumoPointsChild = "8000/16000";
     } else if (han >= 11) {
       ronPoints = { dealer: 36000, child: 24000 };
       tsumoPointsDealer = "12000オール";
-      tsumoPointsChild = "12000/24000";
+      tsumoPointsChild = "6000/12000";
     } else if (han >= 8) {
       ronPoints = { dealer: 24000, child: 16000 };
       tsumoPointsDealer = "8000オール";
-      tsumoPointsChild = "8000/16000";
+      tsumoPointsChild = "4000/8000";
     } else if (han >= 6) {
       ronPoints = { dealer: 18000, child: 12000 };
       tsumoPointsDealer = "6000オール";
-      tsumoPointsChild = "6000/12000";
+      tsumoPointsChild = "3000/6000";
     } else if (han >= 5) {
       ronPoints = { dealer: 12000, child: 8000 };
       tsumoPointsDealer = "4000オール";
-      tsumoPointsChild = "4000/8000";
+      tsumoPointsChild = "2000/4000";
     } else {
       ronPoints = {
         dealer: ronPointTable[fu]?.dealer?.[han],
