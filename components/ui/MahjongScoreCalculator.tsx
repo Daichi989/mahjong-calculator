@@ -196,7 +196,7 @@ const MahjongScoreCalculator = () => {
     <div className="p-4 space-y-4">
       <Card>
         <CardContent className="space-y-2">
-          <h2 className="text-xl font-bold">麻雀点数計算</h2>
+          <h2 className="text-xl font-bold">ざっくり麻雀点数計算くん</h2>
           <p>いつも友達に計算させているあなた🫵ぼくに任せて💪</p>
           <a href="">💡簡単な符の求め方</a>
 
