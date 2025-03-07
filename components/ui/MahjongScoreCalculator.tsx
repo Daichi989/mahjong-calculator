@@ -28,20 +28,20 @@ const tsumoPointTable = {
     dealer: { 1: "500", 2: "1000", 3: "2000", 4: "3900" }
   },
   40: {
-    child: { 1: "400/700", 2: "700/1300", 3: "1300/2600", 4: "2600/5200" },
-    dealer: { 1: "700", 2: "1300", 3: "2600", 4: "5200" }
+    child: { 1: "400/700", 2: "700/1300", 3: "1300/2600", 4: "2000/4000" },
+    dealer: { 1: "700", 2: "1300", 3: "2600", 4: "4000" }
   },
   50: {
-    child: { 1: "400/800", 2: "800/1600", 3: "1600/3200", 4: "3200/6400" },
-    dealer: { 1: "800", 2: "1600", 3: "3200", 4: "6400" }
+    child: { 1: "400/800", 2: "800/1600", 3: "1600/3200", 4: "2000/4000" },
+    dealer: { 1: "800", 2: "1600", 3: "3200", 4: "4000" }
   },
   60: {
-    child: { 1: "500/1000", 2: "1000/2000", 3: "2000/3900", 4: "3900/7700" },
-    dealer: { 1: "1000", 2: "2000", 3: "3900", 4: "7700" }
+    child: { 1: "500/1000", 2: "1000/2000", 3: "2000/3900", 4: "2000/4000" },
+    dealer: { 1: "1000", 2: "2000", 3: "3900", 4: "4000" }
   },
   70: {
-    child: { 1: "600/1200", 2: "1200/2300", 3: "2000/4000", 4: "4000/8000" },
-    dealer: { 1: "1200", 2: "2300", 3: "4000", 4: "8000" }
+    child: { 1: "600/1200", 2: "1200/2300", 3: "2000/4000", 4: "2000/4000" },
+    dealer: { 1: "1200", 2: "2300", 3: "4000", 4: "4000" }
   }
 };
 
@@ -116,6 +116,7 @@ const MahjongScoreCalculator = () => {
   const [score, setScore] = useState(null);
   const [selectedYaku, setSelectedYaku] = useState([]);
   const [doraCount, setDoraCount] = useState(0);
+  const [handName, setHandName] = useState("");
 
   // 選択された役に基づいてハン数を計算
   useEffect(() => {
@@ -138,57 +139,51 @@ const MahjongScoreCalculator = () => {
     }
   };
 
+  // 役満判定とその名前を取得
+  const getHandNameAndPoints = (han, fu) => {
+    if (han >= 13) return { name: "役満", dealerRon: 48000, childRon: 32000, dealerTsumo: "16000オール", childTsumo: "16000/32000" };
+    if (han >= 11) return { name: "三倍満", dealerRon: 36000, childRon: 24000, dealerTsumo: "12000オール", childTsumo: "12000/24000" };
+    if (han >= 8) return { name: "倍満", dealerRon: 24000, childRon: 16000, dealerTsumo: "8000オール", childTsumo: "8000/16000" };
+    if (han >= 6) return { name: "跳満", dealerRon: 18000, childRon: 12000, dealerTsumo: "6000オール", childTsumo: "6000/12000" };
+    if (han >= 5) return { name: "満貫", dealerRon: 12000, childRon: 8000, dealerTsumo: "4000オール", childTsumo: "4000/8000" };
+    
+    // 符と翻の組み合わせによる満貫判定
+    if (han === 4 && fu >= 40) return { name: "満貫", dealerRon: 12000, childRon: 8000, dealerTsumo: "4000オール", childTsumo: "4000/8000" };
+    if (han === 3 && fu >= 70) return { name: "満貫", dealerRon: 12000, childRon: 8000, dealerTsumo: "4000オール", childTsumo: "4000/8000" };
+
+    // 通常の点数計算
+    return { 
+      name: "", 
+      dealerRon: ronPointTable[fu]?.dealer?.[han], 
+      childRon: ronPointTable[fu]?.child?.[han],
+      dealerTsumo: tsumoPointTable[fu]?.dealer?.[han],
+      childTsumo: tsumoPointTable[fu]?.child?.[han]
+    };
+  };
+
   const calculateScore = () => {
     if (han < 1) {
       setScore("無効な役");
+      setHandName("");
       return;
     }
 
-    let ronPoints, tsumoPointsDealer, tsumoPointsChild;
+    const handInfo = getHandNameAndPoints(han, fu);
+    setHandName(handInfo.name);
 
-    if(han >= 26) {
-        ronPoints = { dealer: 96000, child: 64000 };
-        tsumoPointsDealer = "32000オール";
-        tsumoPointsChild = "16000/32000";
-      }
-    else if (han >= 13) {
-      ronPoints = { dealer: 48000, child: 32000 };
-      tsumoPointsDealer = "16000オール";
-      tsumoPointsChild = "8000/16000";
-    } else if (han >= 11) {
-      ronPoints = { dealer: 36000, child: 24000 };
-      tsumoPointsDealer = "12000オール";
-      tsumoPointsChild = "6000/12000";
-    } else if (han >= 8) {
-      ronPoints = { dealer: 24000, child: 16000 };
-      tsumoPointsDealer = "8000オール";
-      tsumoPointsChild = "4000/8000";
-    } else if (han >= 6) {
-      ronPoints = { dealer: 18000, child: 12000 };
-      tsumoPointsDealer = "6000オール";
-      tsumoPointsChild = "3000/6000";
-    } else if (han >= 5) {
-      ronPoints = { dealer: 12000, child: 8000 };
-      tsumoPointsDealer = "4000オール";
-      tsumoPointsChild = "2000/4000";
-    } else {
-      ronPoints = {
-        dealer: ronPointTable[fu]?.dealer?.[han],
-        child: ronPointTable[fu]?.child?.[han]
-      };
-      tsumoPointsDealer = tsumoPointTable[fu]?.dealer?.[han];
-      tsumoPointsChild = tsumoPointTable[fu]?.child?.[han];
-    }
-
-    if (!ronPoints.child || !ronPoints.dealer || !tsumoPointsDealer || !tsumoPointsChild) {
+    if (!handInfo.childRon || !handInfo.dealerRon || !handInfo.dealerTsumo || !handInfo.childTsumo) {
       setScore("無効な符・翻の組み合わせ");
+      setHandName("");
       return;
     }
 
     setScore({
-      ron: ronPoints,
-      tsumoDealer: tsumoPointsDealer,
-      tsumoChild: tsumoPointsChild
+      ron: {
+        dealer: handInfo.dealerRon,
+        child: handInfo.childRon
+      },
+      tsumoDealer: handInfo.dealerTsumo,
+      tsumoChild: handInfo.childTsumo
     });
   };
 
@@ -227,6 +222,7 @@ const MahjongScoreCalculator = () => {
           
           {score && typeof score !== 'string' && (
             <div className="space-y-2 mt-4">
+              {handName && <p className="font-bold text-green-600">{handName}</p>}
               <p className="text-xl font-bold">{score.ron.child}点</p>
               <p>親：{score.ron.dealer}点 ({score.tsumoDealer})</p>
               <p>子：{score.ron.child}点 ({score.tsumoChild})</p>
