@@ -1,8 +1,10 @@
 "use client"
 
 import React, { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 
 const ronPointTable = {
   20: { child: { 1: null, 2: 1300, 3: 2600, 4: 5200 }, dealer: { 1: null, 2: 2000, 3: 3900, 4:7700 } },
@@ -117,6 +119,7 @@ const MahjongScoreCalculator = () => {
   const [selectedYaku, setSelectedYaku] = useState([]);
   const [doraCount, setDoraCount] = useState(0);
   const [handName, setHandName] = useState("");
+  const [activeTab, setActiveTab] = useState("han1");
 
   // 選択された役に基づいてハン数を計算
   useEffect(() => {
@@ -192,216 +195,303 @@ const MahjongScoreCalculator = () => {
     return selectedYaku.some(yaku => yaku.name === yakuName);
   };
 
+  // 選択中の役の数
+  const selectedYakuCount = (category) => {
+    return selectedYaku.filter(yaku => 
+      yakuList[category].some(item => item.name === yaku.name)
+    ).length;
+  };
+
   return (
-    <div className="p-4 space-y-4">
-      <Card>
-        <CardContent className="space-y-2">
-          <h2 className="text-xl font-bold">ざっくり麻雀点数計算くん</h2>
-          <p>いつも友達に計算させているあなた🫵ぼくに任せて💪</p>
-          <a href="/hu">💡簡単な符の求め方</a>
-
-          <div className="flex space-x-2 items-center">
-            <input
-              type="number"
-              placeholder="翻数"
-              value={han}
-              onChange={(e) => setHan(Number(e.target.value))}
-              min="1"
-              className="w-16 p-1 border rounded"
-            /> 翻
-            <select 
-              value={fu} 
-              onChange={(e) => setFu(Number(e.target.value))}
-              className="p-1 border rounded"
-            >
-              {[20, 25, 30, 40, 50, 60, 70].map((f) => (
-                <option key={f} value={f}>{f} 符</option>
-              ))}
-            </select>
+    <div className="p-4 max-w-lg mx-auto space-y-6 bg-gray-50 min-h-screen">
+      <Card className="shadow-md border-t-4 border-t-blue-500">
+        <CardHeader className="pb-2 text-center">
+          <CardTitle className="text-2xl font-bold text-blue-700">ざっくり麻雀点数計算くん</CardTitle>
+          <p className="text-gray-600 text-sm">いつも友達に計算させているあなた🫵ぼくに任せて💪</p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="bg-blue-50 p-3 rounded-lg">
+            <div className="flex justify-between items-center mb-2">
+              <div className="flex items-center space-x-3">
+                <div className="flex flex-col items-center">
+                  <input
+                    type="number"
+                    value={han}
+                    onChange={(e) => setHan(Number(e.target.value))}
+                    min="1"
+                    className="w-16 p-2 border rounded-md text-center text-lg font-semibold bg-white"
+                  />
+                  <span className="text-sm text-gray-600 mt-1">翻</span>
+                </div>
+                <span className="text-xl">×</span>
+                <div className="flex flex-col items-center">
+                  <select 
+                    value={fu} 
+                    onChange={(e) => setFu(Number(e.target.value))}
+                    className="p-2 border rounded-md text-center text-lg font-semibold bg-white"
+                  >
+                    {[20, 25, 30, 40, 50, 60, 70].map((f) => (
+                      <option key={f} value={f}>{f}</option>
+                    ))}
+                  </select>
+                  <span className="text-sm text-gray-600 mt-1">符</span>
+                </div>
+              </div>
+              <Button 
+                onClick={calculateScore} 
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md"
+              >
+                計算
+              </Button>
+            </div>
+            <a href="/hu" className="text-blue-600 text-sm flex items-center mt-2 hover:underline">
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              簡単な符の求め方
+            </a>
           </div>
-
-          <Button onClick={calculateScore} className="w-full">計算</Button>
           
           {score && typeof score !== 'string' && (
-            <div className="space-y-2 mt-4">
-              {handName && <p className="font-bold text-green-600">{handName}</p>}
-              <p className="text-xl font-bold">{score.ron.child}点</p>
-              <p>親：{score.ron.dealer}点 ({score.tsumoDealer})</p>
-              <p>子：{score.ron.child}点 ({score.tsumoChild})</p>
+            <div className="border rounded-lg p-4 mt-4 bg-white shadow-sm">
+              {handName && <div className="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold mb-2">{handName}</div>}
+              <p className="text-2xl font-bold text-center mb-3">{score.ron.child.toLocaleString()}点</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gray-50 p-3 rounded-md">
+                  <p className="text-gray-700 font-semibold mb-1">親</p>
+                  <p className="text-lg">{score.ron.dealer.toLocaleString()}点</p>
+                  <p className="text-gray-600 text-sm">ツモ: {score.tsumoDealer}</p>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-md">
+                  <p className="text-gray-700 font-semibold mb-1">子</p>
+                  <p className="text-lg">{score.ron.child.toLocaleString()}点</p>
+                  <p className="text-gray-600 text-sm">ツモ: {score.tsumoChild}</p>
+                </div>
+              </div>
             </div>
           )}
           {typeof score === 'string' && (
-            <p className="text-lg text-red-500">{score}</p>
+            <p className="text-center text-red-500 font-semibold p-2 bg-red-50 rounded-md mt-4">{score}</p>
           )}
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="shadow-md">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg font-bold">選択中の役</CardTitle>
+        </CardHeader>
         <CardContent className="space-y-4">
-          <h3 className="text-lg font-bold">選択中の役</h3>
-          {selectedYaku.length > 0 ? (
-            <div className="flex flex-wrap gap-1">
-              {selectedYaku.map((yaku) => (
-                <span key={yaku.name} className="bg-blue-100 px-2 py-1 rounded text-sm">
-                  {yaku.name} ({yaku.value}飜)
-                </span>
-              ))}
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex flex-wrap gap-1 flex-1">
+              {selectedYaku.length > 0 ? (
+                selectedYaku.map((yaku) => (
+                  <Badge 
+                    key={yaku.name} 
+                    variant="secondary"
+                    className="bg-blue-100 hover:bg-blue-200 text-blue-800 cursor-pointer"
+                    onClick={() => toggleYaku(yaku)}
+                  >
+                    {yaku.name} ({yaku.value}飜)
+                  </Badge>
+                ))
+              ) : (
+                <p className="text-gray-500 text-sm italic">役が選択されていません</p>
+              )}
             </div>
-          ) : (
-            <p className="text-gray-500">役が選択されていません</p>
-          )}
-
-          <div className="flex items-center space-x-2">
-            <span>ドラ：</span>
-            <Button 
-              onClick={() => setDoraCount(Math.max(0, doraCount - 1))} 
-              className="px-2 py-1 h-8 min-h-0"
-              variant="outline"
-            >
-              -
-            </Button>
-            <span className="w-8 text-center">{doraCount}</span>
-            <Button 
-              onClick={() => setDoraCount(doraCount + 1)} 
-              className="px-2 py-1 h-8 min-h-0"
-              variant="outline"
-            >
-              +
-            </Button>
           </div>
 
-          <p className="font-bold">合計: {han}飜</p>
+          <div className="flex items-center justify-between p-2 bg-gray-100 rounded-md">
+            <div className="flex items-center space-x-2">
+              <span className="font-medium">ドラ：</span>
+              <div className="flex items-center space-x-1">
+                <Button 
+                  onClick={() => setDoraCount(Math.max(0, doraCount - 1))} 
+                  className="h-7 w-7 rounded-full p-0 bg-white border border-gray-300 hover:bg-gray-100 text-gray-700"
+                  variant="outline"
+                >
+                  -
+                </Button>
+                <span className="w-6 text-center font-semibold">{doraCount}</span>
+                <Button 
+                  onClick={() => setDoraCount(doraCount + 1)} 
+                  className="h-7 w-7 rounded-full p-0 bg-white border border-gray-300 hover:bg-gray-100 text-gray-700"
+                  variant="outline"
+                >
+                  +
+                </Button>
+              </div>
+            </div>
+            <div className="font-bold text-blue-700">合計: {han}飜</div>
+          </div>
         </CardContent>
       </Card>
 
-      <div className="space-y-4">
-        <div className="border rounded p-3">
-          <p className="font-bold mb-2">1飜役</p>
-          <div className="flex flex-wrap gap-2">
-            {yakuList.han1.map((yaku) => (
-              <Button
-                key={yaku.name}
-                size="sm"
-                variant={isYakuSelected(yaku.name) ? "default" : "outline"}
-                onClick={() => toggleYaku(yaku)}
-                className="text-xs p-1 h-auto"
-              >
-                {yaku.name}
-              </Button>
-            ))}
-            <Button
-              size="sm"
-              variant={doraCount > 0 ? "default" : "outline"}
-              onClick={() => setDoraCount(doraCount > 0 ? 0 : 1)}
-              className="text-xs p-1 h-auto"
-            >
-              ドラ
-            </Button>
-          </div>
-        </div>
-
-        <div className="border rounded p-3">
-          <p className="font-bold mb-2">2飜役</p>
-          <div className="flex flex-wrap gap-2">
-            {yakuList.han2.map((yaku) => (
-              <Button
-                key={yaku.name}
-                size="sm"
-                variant={isYakuSelected(yaku.name) ? "default" : "outline"}
-                onClick={() => toggleYaku(yaku)}
-                className="text-xs p-1 h-auto"
-              >
-                {yaku.name}
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        <div className="border rounded p-3">
-          <p className="font-bold mb-2">3飜役</p>
-          <div className="flex flex-wrap gap-2">
-            {yakuList.han3.map((yaku) => (
-              <Button
-                key={yaku.name}
-                size="sm"
-                variant={isYakuSelected(yaku.name) ? "default" : "outline"}
-                onClick={() => toggleYaku(yaku)}
-                className="text-xs p-1 h-auto"
-              >
-                {yaku.name}
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        <div className="border rounded p-3">
-          <p className="font-bold mb-2">5飜役</p>
-          <div className="flex flex-wrap gap-2">
-            {yakuList.han5.map((yaku) => (
-              <Button
-                key={yaku.name}
-                size="sm"
-                variant={isYakuSelected(yaku.name) ? "default" : "outline"}
-                onClick={() => toggleYaku(yaku)}
-                className="text-xs p-1 h-auto"
-              >
-                {yaku.name}
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        <div className="border rounded p-3">
-          <p className="font-bold mb-2">6飜役</p>
-          <div className="flex flex-wrap gap-2">
-            {yakuList.han6.map((yaku) => (
-              <Button
-                key={yaku.name}
-                size="sm"
-                variant={isYakuSelected(yaku.name) ? "default" : "outline"}
-                onClick={() => toggleYaku(yaku)}
-                className="text-xs p-1 h-auto"
-              >
-                {yaku.name}
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        <div className="border rounded p-3">
-          <p className="font-bold mb-2">役満</p>
-          <div className="flex flex-wrap gap-2">
-            {yakuList.yakuman.map((yaku) => (
-              <Button
-                key={yaku.name}
-                size="sm"
-                variant={isYakuSelected(yaku.name) ? "default" : "outline"}
-                onClick={() => toggleYaku(yaku)}
-                className="text-xs p-1 h-auto"
-              >
-                {yaku.name}
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        <div className="border rounded p-3">
-          <p className="font-bold mb-2">ダブル役満</p>
-          <div className="flex flex-wrap gap-2">
-            {yakuList.doubleYakuman.map((yaku) => (
-              <Button
-                key={yaku.name}
-                size="sm"
-                variant={isYakuSelected(yaku.name) ? "default" : "outline"}
-                onClick={() => toggleYaku(yaku)}
-                className="text-xs p-1 h-auto"
-              >
-                {yaku.name}
-              </Button>
-            ))}
-          </div>
-        </div>
-      </div>
+      <Card className="shadow-md overflow-hidden">
+        <Tabs defaultValue="han1" value={activeTab} onValueChange={setActiveTab}>
+          <CardHeader className="pb-0">
+            <CardTitle className="text-lg font-bold mb-2">役選択</CardTitle>
+            <TabsList className="grid grid-cols-4 bg-gray-100">
+              <TabsTrigger value="han1" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 relative">
+                1飜役
+                {selectedYakuCount('han1') > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                    {selectedYakuCount('han1')}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="han2-3" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 relative">
+                2-3飜役
+                {(selectedYakuCount('han2') + selectedYakuCount('han3')) > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                    {selectedYakuCount('han2') + selectedYakuCount('han3')}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="han5-6" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 relative">
+                5-6飜役
+                {(selectedYakuCount('han5') + selectedYakuCount('han6')) > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                    {selectedYakuCount('han5') + selectedYakuCount('han6')}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="yakuman" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 relative">
+                役満
+                {(selectedYakuCount('yakuman') + selectedYakuCount('doubleYakuman')) > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                    {selectedYakuCount('yakuman') + selectedYakuCount('doubleYakuman')}
+                  </span>
+                )}
+              </TabsTrigger>
+            </TabsList>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <TabsContent value="han1" className="mt-0">
+              <div className="grid grid-cols-3 gap-2">
+                {yakuList.han1.map((yaku) => (
+                  <Button
+                    key={yaku.name}
+                    variant={isYakuSelected(yaku.name) ? "default" : "outline"}
+                    onClick={() => toggleYaku(yaku)}
+                    className={`text-sm h-auto py-1.5 ${isYakuSelected(yaku.name) ? 'bg-blue-600 hover:bg-blue-700' : 'bg-white hover:bg-gray-100 border-gray-300'}`}
+                  >
+                    {yaku.name}
+                  </Button>
+                ))}
+                <Button
+                  variant={doraCount > 0 ? "default" : "outline"}
+                  onClick={() => setDoraCount(doraCount > 0 ? 0 : 1)}
+                  className={`text-sm h-auto py-1.5 ${doraCount > 0 ? 'bg-blue-600 hover:bg-blue-700' : 'bg-white hover:bg-gray-100 border-gray-300'}`}
+                >
+                  ドラ
+                </Button>
+              </div>
+            </TabsContent>
+            <TabsContent value="han2-3" className="mt-0">
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-sm font-medium mb-2 text-gray-700">2飜役</h4>
+                  <div className="grid grid-cols-3 gap-2">
+                    {yakuList.han2.map((yaku) => (
+                      <Button
+                        key={yaku.name}
+                        variant={isYakuSelected(yaku.name) ? "default" : "outline"}
+                        onClick={() => toggleYaku(yaku)}
+                        className={`text-sm h-auto py-1.5 ${isYakuSelected(yaku.name) ? 'bg-blue-600 hover:bg-blue-700' : 'bg-white hover:bg-gray-100 border-gray-300'}`}
+                      >
+                        {yaku.name}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium mb-2 text-gray-700">3飜役</h4>
+                  <div className="grid grid-cols-3 gap-2">
+                    {yakuList.han3.map((yaku) => (
+                      <Button
+                        key={yaku.name}
+                        variant={isYakuSelected(yaku.name) ? "default" : "outline"}
+                        onClick={() => toggleYaku(yaku)}
+                        className={`text-sm h-auto py-1.5 ${isYakuSelected(yaku.name) ? 'bg-blue-600 hover:bg-blue-700' : 'bg-white hover:bg-gray-100 border-gray-300'}`}
+                      >
+                        {yaku.name}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+            <TabsContent value="han5-6" className="mt-0">
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-sm font-medium mb-2 text-gray-700">5飜役</h4>
+                  <div className="grid grid-cols-3 gap-2">
+                    {yakuList.han5.map((yaku) => (
+                      <Button
+                        key={yaku.name}
+                        variant={isYakuSelected(yaku.name) ? "default" : "outline"}
+                        onClick={() => toggleYaku(yaku)}
+                        className={`text-sm h-auto py-1.5 ${isYakuSelected(yaku.name) ? 'bg-blue-600 hover:bg-blue-700' : 'bg-white hover:bg-gray-100 border-gray-300'}`}
+                      >
+                        {yaku.name}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium mb-2 text-gray-700">6飜役</h4>
+                  <div className="grid grid-cols-3 gap-2">
+                    {yakuList.han6.map((yaku) => (
+                      <Button
+                        key={yaku.name}
+                        variant={isYakuSelected(yaku.name) ? "default" : "outline"}
+                        onClick={() => toggleYaku(yaku)}
+                        className={`text-sm h-auto py-1.5 ${isYakuSelected(yaku.name) ? 'bg-blue-600 hover:bg-blue-700' : 'bg-white hover:bg-gray-100 border-gray-300'}`}
+                      >
+                        {yaku.name}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+            <TabsContent value="yakuman" className="mt-0">
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-sm font-medium mb-2 text-gray-700">役満</h4>
+                  <div className="grid grid-cols-3 gap-2">
+                    {yakuList.yakuman.map((yaku) => (
+                      <Button
+                        key={yaku.name}
+                        variant={isYakuSelected(yaku.name) ? "default" : "outline"}
+                        onClick={() => toggleYaku(yaku)}
+                        className={`text-sm h-auto py-1.5 ${isYakuSelected(yaku.name) ? 'bg-blue-600 hover:bg-blue-700' : 'bg-white hover:bg-gray-100 border-gray-300'}`}
+                      >
+                        {yaku.name}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium mb-2 text-gray-700">ダブル役満</h4>
+                  <div className="grid grid-cols-3 gap-2">
+                    {yakuList.doubleYakuman.map((yaku) => (
+                      <Button
+                        key={yaku.name}
+                        variant={isYakuSelected(yaku.name) ? "default" : "outline"}
+                        onClick={() => toggleYaku(yaku)}
+                        className={`text-sm h-auto py-1.5 ${isYakuSelected(yaku.name) ? 'bg-blue-600 hover:bg-blue-700' : 'bg-white hover:bg-gray-100 border-gray-300'}`}
+                      >
+                        {yaku.name}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+          </CardContent>
+        </Tabs>
+      </Card>
     </div>
   );
 };

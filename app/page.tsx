@@ -1,5 +1,4 @@
 import MahjongScoreCalculator from '@/components/ui/MahjongScoreCalculator';
-import Yaku from '@/components/ui/Yaku';
 
 export default function Home() {
   return (
