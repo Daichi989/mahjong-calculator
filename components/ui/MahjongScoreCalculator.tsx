@@ -113,7 +113,7 @@ const yakuList = {
 };
 
 const MahjongScoreCalculator = () => {
-  const [han, setHan] = useState(1);
+  const [han, setHan] = useState(0);
   const [fu, setFu] = useState(30);
   const [score, setScore] = useState(null);
   const [selectedYaku, setSelectedYaku] = useState([]);
@@ -127,7 +127,7 @@ const MahjongScoreCalculator = () => {
       const totalHan = selectedYaku.reduce((sum, yaku) => sum + yaku.value, 0) + doraCount;
       setHan(totalHan);
     } else {
-      setHan(1); // デフォルト値
+      setHan(0); // デフォルト値
     }
   }, [selectedYaku, doraCount]);
 
@@ -321,7 +321,7 @@ const MahjongScoreCalculator = () => {
                 </Button>
               </div>
             </div>
-            <div className="font-bold text-blue-700">合計: {han}飜</div>
+            <div className="font-bold text-blue-700">合計: {han || 0}飜</div>
           </div>
         </CardContent>
       </Card>
